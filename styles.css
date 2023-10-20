@@ -1,10 +1,10 @@
 :root {
   --background: #222222;
   --game-background: #0e0e0e;
-  --game-red: #ff3b3b;
-  --game-blue: #3232ff;
-  --game-green: #40ff40;
-  --game-yellow: #ffff3b;
+  --game-tile-red: #ff3b3b;
+  --game-tile-blue: #3232ff;
+  --game-tile-green: #40ff40;
+  --game-tile-yellow: #ffff3b;
 }
 
 body {
@@ -24,9 +24,35 @@ body {
 .game-layout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
   height: 40rem;
   width: 40rem;
   color: white;
   border-radius: 8rem;
   background-color: var(--game-background);
+}
+
+.game-layout .tile:hover {
+  filter: brightness(1.5);
+}
+
+.game-layout .tile-tl {
+  border-radius: 7rem 1rem 1rem 1rem;
+  background-color: var(--game-tile-yellow);
+}
+
+.game-layout .tile-tr {
+  border-radius: 1rem 7rem 1rem 1rem;
+  background-color: var(--game-tile-blue);
+}
+
+.game-layout .tile-bl {
+  border-radius: 1rem 1rem 1rem 7rem;
+  background-color: var(--game-tile-red);
+}
+
+.game-layout .tile-br {
+  border-radius: 1rem 1rem 7rem 1rem;
+  background-color: var(--game-tile-green);
 }
