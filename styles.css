@@ -7,6 +7,7 @@
   --game-tile-yellow: #ffff3b;
   --game-button: #2c2c2c;
   --game-button-focus: #6ee26a;
+  --game-tile-flash: #eeeeee;
 }
 
 body {
@@ -65,6 +66,8 @@ body {
   background-color: var(--game-tile-green);
 }
 
+
+
 .game-control-layout {
   display: flex;
   flex-direction: column;
@@ -121,3 +124,6 @@ body {
   line-height: 1.7rem;
 }
 
+.game-layout .tile.active {
+  background-color: white;
+}
