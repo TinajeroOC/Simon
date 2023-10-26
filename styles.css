@@ -42,6 +42,7 @@ body {
 
 .game-layout .tile:hover {
   filter: brightness(1.5);
+  box-shadow: inset 0px 0px 8px #D4ADFC;
 }
 
 .game-layout .tile-tl {
@@ -105,4 +106,18 @@ body {
 .game-control-layout .button:hover {
   transition: 0.2s;
   background-color: var(--game-button-focus);
+  cursor: pointer;
 }
+
+.game-control-layout .instructions {
+  color: white;
+  width: 21rem;
+  padding: .5rem;
+  margin-top: -12px;
+  margin-bottom: -6px;
+  font-size: 1rem;
+  font-weight: bold;
+  user-select: none;
+  line-height: 1.7rem;
+}
+
