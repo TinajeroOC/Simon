@@ -10,7 +10,17 @@ class Game {
     this.patternToGuess = []
     this.previousPattern = JSON.parse(localStorage.getItem(this.storageKey))
     this.canClick = false
-    this.tiles = {}
+    this.tiles = {
+      tl: document.querySelector('.tile-tl'),
+      tr: document.querySelector('.tile-tr'),
+      bl: document.querySelector('.tile-bl'),
+      br: document.querySelector('.tile-br'),
+    }
+
+    // Tile Event Listeners
+    for (const tile in this.tiles) {
+      this.tiles[tile].addEventListener('click', () => this.tileClick(this.tiles[tile]))
+    }
 
     // HTML DOM Elements
     this.gameRoundTracker = null
@@ -108,19 +118,6 @@ class Game {
     this.gameRoundTracker.innerText = this.round.toString()
   }
 
-  setTileListeners() {
-    this.tiles = {
-      tl: document.querySelector('.tile-tl'),
-      tr: document.querySelector('.tile-tr'),
-      bl: document.querySelector('.tile-bl'),
-      br: document.querySelector('.tile-br'),
-    }
-
-    for (const tile in this.tiles) {
-      this.tiles[tile].addEventListener('click', () => this.tileClick(this.tiles[tile]))
-    }
-  }
-
   getRandomTile() {
     const keys = Object.keys(this.tiles)
     return keys[parseInt(Math.random() * keys.length)]
@@ -176,6 +173,5 @@ class Game {
 
 document.addEventListener('DOMContentLoaded', () => {
   const game = new Game()
-  game.setTileListeners()
   game.displayMainMenu()
 })
