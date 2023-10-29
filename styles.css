@@ -66,6 +66,13 @@ body {
   background-color: var(--game-tile-green);
 }
 
+.game-layout .tile-tl:active,
+.tile-tr:active,
+.tile-bl:active,
+.tile-br:active {
+  background-color: white;
+}
+
 .game-control-layout {
   display: flex;
   flex-direction: column;

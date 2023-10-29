@@ -10,48 +10,20 @@ let tiles = {};
 //////////////////////////////////////// Event Handlers for each tile ////////////////////////////////////////////////////////////////////////////////
 // The original plan was to add an onclick attribute for each html element, but the tileClicked function could not be seen because the startGame function is inside an event listener from the startGame button
 // Event listeners were removed from the startGame function because after the game restarted, the event listeners would stack and cause unexpected behavior, so we should bind them to event handlers at the start of the startGame function instead
-const handleTopLeftMouseDown = () => {
-    const topLeftTile = document.querySelector('.tile-tl');
-    topLeftTile.style.background = 'white';
-}
-
 const handleTopLeftMouseUp = () => {
-    const topLeftTile = document.querySelector('.tile-tl');
-    topLeftTile.style.background = '';
-    tileClicked(topLeftTile);
-}
-
-const handleTopRightMouseDown = () => {
-    const topRightTile = document.querySelector('.tile-tr');
-    topRightTile.style.background = 'white';
+    tileClicked(tiles.tl);
 }
 
 const handleTopRightMouseUp = () => {
-    const topRightTile = document.querySelector('.tile-tr');
-    topRightTile.style.background = '';
-    tileClicked(topRightTile);
-}
-
-const handleBottomLeftMouseDown = () => {
-    const bottomLeftTile = document.querySelector('.tile-bl');
-    bottomLeftTile.style.background = 'white';
+    tileClicked(tiles.tr);
 }
 
 const handleBottomLeftMouseUp = () => {
-    const bottomLeftTile = document.querySelector('.tile-bl');
-    bottomLeftTile.style.background = '';
-    tileClicked(bottomLeftTile);
-}
-
-const handleBottomRightMouseDown = () => {
-    const bottomRightTile = document.querySelector('.tile-br');
-    bottomRightTile.style.background = 'white';
+    tileClicked(tiles.bl);
 }
 
 const handleBottomRightMouseUp = () => {
-    const bottomRightTile = document.querySelector('.tile-br');
-    bottomRightTile.style.background = '';
-    tileClicked(bottomRightTile);
+    tileClicked(tiles.br);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Event listener to show the welcome screen dynamically after every page load/reload //////////////////////////
@@ -164,13 +136,10 @@ const tileClicked = selectedTile => {
 const flash = tile => {
     return new Promise((resolve, reject) => {
         // Activates the current tile in the pattern
-        tile.className += ' active';
+        tile.classList.add('active')
         // Set a timer for how long the active tile flashes before changing the active tile
         setTimeout(() => {
-            tile.className = tile.className.replace(
-                ' active',
-                ''
-            );
+            tile.classList.remove('active');
             // In case the pattern has the same tile back to back, it will be 2 short flashes instead of one long flash
             setTimeout(() => {
                 resolve();
@@ -207,13 +176,9 @@ const startGame = (continuation = false) => {
     }
 
     // Bind event listeners to event handlers
-    tiles.tl.addEventListener('mousedown', handleTopLeftMouseDown);
     tiles.tl.addEventListener('mouseup', handleTopLeftMouseUp);
-    tiles.tr.addEventListener('mousedown', handleTopRightMouseDown);
     tiles.tr.addEventListener('mouseup', handleTopRightMouseUp);
-    tiles.bl.addEventListener('mousedown', handleBottomLeftMouseDown);
     tiles.bl.addEventListener('mouseup', handleBottomLeftMouseUp);
-    tiles.br.addEventListener('mousedown', handleBottomRightMouseDown);
     tiles.br.addEventListener('mouseup', handleBottomRightMouseUp);
 
     // Initialize the pattern with the first random tile
@@ -254,21 +219,11 @@ const endGame = () => {
     gameControlLayout.appendChild(h3);
     gameControlLayout.appendChild(btn);
 
-    // Get tiles
-    const topLeftTile = document.querySelector('.tile-tl');
-    const topRightTile = document.querySelector('.tile-tr');
-    const bottomLeftTile = document.querySelector('.tile-bl');
-    const bottomRightTile = document.querySelector('.tile-br');
-
     // Remove event listeners so they don't stack
-    topLeftTile.removeEventListener('mousedown', handleTopLeftMouseDown);
-    topLeftTile.removeEventListener('mouseup', handleTopLeftMouseUp);
-    topRightTile.removeEventListener('mousedown', handleTopRightMouseDown);
-    topRightTile.removeEventListener('mouseup', handleTopRightMouseUp);
-    bottomLeftTile.removeEventListener('mousedown', handleBottomLeftMouseUp);
-    bottomLeftTile.removeEventListener('mouseup', handleBottomLeftMouseUp);
-    bottomRightTile.removeEventListener('mousedown', handleBottomRightMouseDown);
-    bottomRightTile.removeEventListener('mouseup', handleBottomRightMouseUp);
+    tiles.tl.removeEventListener('mouseup', handleTopLeftMouseUp);
+    tiles.tr.removeEventListener('mouseup', handleTopRightMouseUp);
+    tiles.bl.removeEventListener('mouseup', handleBottomLeftMouseUp);
+    tiles.br.removeEventListener('mouseup', handleBottomRightMouseUp);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
