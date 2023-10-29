@@ -1,8 +1,9 @@
 //////////////////////////////////////// Declare game state globally ////////////////////////////////////////////////////////////////////////////////
 let pattern = [];        // This array will hold the full current pattern
-let canClick = false;    // Controls when the user can begin entering the pattern
 let patternToGuess = []; // patternToGuess is a copy of the pattern array, which always holds the current pattern
 const previousGamePattern = JSON.parse(localStorage.getItem("simon-game-pattern")); // Holds previous game pattern array, if it exists.
+let canClick = false;    // Controls when the user can begin entering the pattern
+let currentRound = 1;           // The current round of the game
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Declare variables globally /////////////////////////////////////////////////////////////////////////////////
 let tiles = {};
@@ -66,6 +67,33 @@ const displayMainMenu = () => {
     gameControlLayout.appendChild(howToPlayBtn);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Function that displays active game state ////////////////////////////////////////////////////////////////////
+const displayGameStatus = () => {
+    const gameControlLayout = document.querySelector('.game-control-layout');
+    gameControlLayout.innerHTML = ''; // Remove any existing html
+
+    // Create h3
+    const title = document.createElement('h3');
+    title.className = 'title';
+    title.innerText = 'Playing';
+
+    const roundTracker = document.createElement('div')
+    console.log("round")
+    roundTracker.className = 'round-tracker';
+    roundTracker.innerText = currentRound.toString();
+
+    // Append to container
+    gameControlLayout.appendChild(title);
+    gameControlLayout.appendChild(roundTracker);
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Function that updates round tracker text ////////////////////////////////////////////////////////////////////
+const updateRoundTracker = () => {
+    currentRound = currentRound + 1;
+    const roundTracker = document.querySelector('.round-tracker')
+    roundTracker.innerText = currentRound.toString();
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Function that displays how to play //////////////////////////////////////////////////////////////////////////
 const displayHowToPlay = () => {
     const gameControlLayout = document.querySelector(".game-control-layout");
@@ -123,11 +151,11 @@ const tileClicked = selectedTile => {
                 // Start outputting the next pattern after 500 ms
                 startFlashing();
             }, 500)
+            updateRoundTracker();
             localStorage.setItem("simon-game-pattern", JSON.stringify(patternToGuess));
         }
     }
     else { // If the wrong tile was selected, end the game
-        localStorage.removeItem("simon-game-pattern");
         endGame();
     }
 }
@@ -163,10 +191,6 @@ const startFlashing = async () => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////// Main function to run game ////////////////////////////////////////////////////////////////////////////
 const startGame = (continuation = false) => {
-    // Hide main menu
-    let gameControlLayout = document.querySelector('.game-control-layout');
-    gameControlLayout.style.display = 'none';
-
     // Set tiles object with each game tile
     tiles = {
         tl: document.querySelector('.tile-tl'),
@@ -181,8 +205,11 @@ const startGame = (continuation = false) => {
     tiles.bl.addEventListener('mouseup', handleBottomLeftMouseUp);
     tiles.br.addEventListener('mouseup', handleBottomRightMouseUp);
 
-    // Initialize the pattern with the first random tile
+    // Initialize the game pattern
     pattern = continuation ? previousGamePattern : [getRandomTile()];
+
+    // Update round counter
+    currentRound = continuation ? previousGamePattern.length : 1;
 
     // This array is a copy of the pattern
     // The user will keep guessing the next tile, and each time the first element will be removed so the next tile can be checked
@@ -193,13 +220,19 @@ const startGame = (continuation = false) => {
     // Store the initial game pattern to browser
     localStorage.setItem("simon-game-pattern", JSON.stringify(pattern));
 
+    displayGameStatus();
+
     startFlashing();
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Function to reset game after loss //////////////////////////////////////////////////////////////////////////
-
-
 const endGame = () => {
+    // Remove game state from local storage
+    localStorage.removeItem("simon-game-pattern");
+
+    // Reset round counter
+    currentRound = 1;
+
     // Show game over menu
     const gameControlLayout = document.querySelector('.game-control-layout');
     gameControlLayout.innerHTML = ''; // Clear all existing HTML

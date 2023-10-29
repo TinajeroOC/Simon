@@ -130,6 +130,17 @@ body {
   line-height: 1.7rem;
 }
 
+.game-control-layout .round-tracker {
+  color: var(--game-button-focus);
+  font-size: 4rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  user-select: none;
+  border-radius: 1rem;
+  padding: 1rem 2rem;
+  background-color: var(--game-background);
+}
+
 .game-layout .tile.active {
   background-color: white;
 }
