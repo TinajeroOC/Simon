@@ -1,278 +1,181 @@
-//////////////////////////////////////// Declare game state globally ////////////////////////////////////////////////////////////////////////////////
-let pattern = [];        // This array will hold the full current pattern
-let patternToGuess = []; // patternToGuess is a copy of the pattern array, which always holds the current pattern
-const previousGamePattern = JSON.parse(localStorage.getItem("simon-game-pattern")); // Holds previous game pattern array, if it exists.
-let canClick = false;    // Controls when the user can begin entering the pattern
-let currentRound = 1;           // The current round of the game
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Declare variables globally /////////////////////////////////////////////////////////////////////////////////
-let tiles = {};
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Event Handlers for each tile ////////////////////////////////////////////////////////////////////////////////
-// The original plan was to add an onclick attribute for each html element, but the tileClicked function could not be seen because the startGame function is inside an event listener from the startGame button
-// Event listeners were removed from the startGame function because after the game restarted, the event listeners would stack and cause unexpected behavior, so we should bind them to event handlers at the start of the startGame function instead
-const handleTopLeftMouseUp = () => {
-    tileClicked(tiles.tl);
-}
+class Game {
+  static STORAGE_KEY = 'simon-game-pattern'
+  static TILE_FLASH_DELAY_MS = 600;
+  static TILE_REMOVAL_DELAY_MS = 300;
 
-const handleTopRightMouseUp = () => {
-    tileClicked(tiles.tr);
-}
+  constructor() {
+    // Game State Variables
+    this.round = 1
+    this.pattern = []
+    this.patternToGuess = []
+    this.previousPattern = JSON.parse(localStorage.getItem(this.storageKey))
+    this.canClick = false
+    this.tiles = {}
 
-const handleBottomLeftMouseUp = () => {
-    tileClicked(tiles.bl);
-}
+    // HTML DOM Elements
+    this.gameRoundTracker = null
+    this.gameControlLayout = document.querySelector('.game-control-layout')
+  }
 
-const handleBottomRightMouseUp = () => {
-    tileClicked(tiles.br);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Event listener to show the welcome screen dynamically after every page load/reload //////////////////////////
-document.addEventListener('DOMContentLoaded', () => {
-    displayMainMenu();
-});
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Function that displays how to play //////////////////////////////////////////////////////////////////////////
-const displayMainMenu = () => {
-    const gameControlLayout = document.querySelector('.game-control-layout');
-    gameControlLayout.innerHTML = ''; // Remove any existing html
+  displayMainMenu() {
+    this.gameControlLayout.innerHTML = ''
 
-    // Create h3
-    const title = document.createElement('h3');
-    title.className = 'title';
-    title.innerText = 'Simon';
+    const title = document.createElement('h3')
+    title.className = 'title'
+    title.innerText = 'Simon'
 
-    // Create Start Game button
-    const startBtn = document.createElement('button');
-    startBtn.className = 'button';
-    startBtn.innerText = (previousGamePattern ? 'New Game' : 'Start Game');
-    startBtn.addEventListener('click', () => { startGame(); });
+    const startButton = document.createElement('button')
+    startButton.className = 'button'
+    startButton.innerText = this.previousPattern ? 'New Game' : 'Start Game'
+    startButton.addEventListener('click', () => this.startGame())
 
-    // Create How to Play button
-    const howToPlayBtn = document.createElement('button');
-    howToPlayBtn.className = 'button';
-    howToPlayBtn.innerText = 'How to Play';
-    howToPlayBtn.addEventListener('click', displayHowToPlay)
+    const continueGameButton = document.createElement('button')
+    continueGameButton.className = 'button'
+    continueGameButton.innerText = 'Continue Game'
+    continueGameButton.addEventListener('click', () => this.startGame(true))
 
-    // Create Continue Game button
-    const continueGameBtn = document.createElement('button');
-    continueGameBtn.className = 'button';
-    continueGameBtn.innerText = 'Continue Game';
-    continueGameBtn.addEventListener('click', () => { startGame(true); })
+    const tutorialButton = document.createElement('button')
+    tutorialButton.className = 'button'
+    tutorialButton.innerText = 'How to Play'
+    tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
 
-    // Append to container
-    gameControlLayout.appendChild(title);
-    gameControlLayout.appendChild(startBtn);
-    previousGamePattern && gameControlLayout.appendChild(continueGameBtn);
-    gameControlLayout.appendChild(howToPlayBtn);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Function that displays active game state ////////////////////////////////////////////////////////////////////
-const displayGameStatus = () => {
-    const gameControlLayout = document.querySelector('.game-control-layout');
-    gameControlLayout.innerHTML = ''; // Remove any existing html
+    this.gameControlLayout.append(title, startButton, tutorialButton)
+    this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, tutorialButton)
+  }
 
-    // Create h3
-    const title = document.createElement('h3');
-    title.className = 'title';
-    title.innerText = 'Playing';
+  displayTutorialMenu() {
+    this.gameControlLayout.innerHTML = ''
 
-    const roundTracker = document.createElement('div')
-    console.log("round")
-    roundTracker.className = 'round-tracker';
-    roundTracker.innerText = currentRound.toString();
-
-    // Append to container
-    gameControlLayout.appendChild(title);
-    gameControlLayout.appendChild(roundTracker);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Function that updates round tracker text ////////////////////////////////////////////////////////////////////
-const updateRoundTracker = () => {
-    currentRound = currentRound + 1;
-    const roundTracker = document.querySelector('.round-tracker')
-    roundTracker.innerText = currentRound.toString();
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Function that displays how to play //////////////////////////////////////////////////////////////////////////
-const displayHowToPlay = () => {
-    const gameControlLayout = document.querySelector(".game-control-layout");
-    gameControlLayout.innerHTML = ''; // Remove any existing html
-
-    // Create h3
-    let title = document.createElement('h3');
-    title.className = 'title';
+    const title = document.createElement('h3')
+    title.className = 'title'
     title.innerText = 'How To Play'
 
-    // Create Paragraph
-    let instructions = document.createElement("p");
-    instructions.className = "instructions";
-    instructions.innerText = 'Simon Says is an endless pattern matching game that repeats a pattern of buttons and increases by one each turn. Test your memory and see how far you can get before messing up. Good luck!';
+    const description = document.createElement('p')
+    description.className = 'instructions'
+    description.innerText = 'Simon Says is an endless pattern matching game that repeats a pattern of buttons and increases by one each turn. Test your memory and see how far you can get before messing up. Good luck!'
 
-    // Create button
-    let backToMenu = document.createElement("button");
-    backToMenu.className = 'button';
-    backToMenu.innerText = 'Back to Menu';
-    backToMenu.addEventListener('click', displayMainMenu);
+    const mainMenuButton = document.createElement('button')
+    mainMenuButton.className = 'button'
+    mainMenuButton.innerText = 'Back to Menu'
+    mainMenuButton.addEventListener('mouseup', () => this.displayMainMenu())
 
-    // Append to container
-    gameControlLayout.appendChild(title);
-    gameControlLayout.appendChild(instructions);
-    gameControlLayout.appendChild(backToMenu);
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// This function returns a random tile for the next item in the pattern ///////////////////////////////////////
-const getRandomTile = () => {
-    // Create a group of all tiles for the function to choose from
-    const tilesKeys = Object.keys(tiles);
+    this.gameControlLayout.append(title, description, mainMenuButton)
+  }
 
-    // Gets a random value between 0 and 3, then rounds it down to the nearest whole number
-    // The result is a random index corresponding to one of the tiles in the array
-    return tilesKeys[parseInt(Math.random() * tilesKeys.length)]
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// This function records the tiles the user clicks /////////////////////////////////////////////////////////////
-const tileClicked = selectedTile => {
-    if (!canClick) return;
-    // The next tile we are expecting to see in the users pattern is the next tile in the patternToGuess array
-    // Each time the user clicks a correct tile, the shift() function puts the next tile in the pattern inside 'expectedTile'
-    // shift() will always remove the first element in the patternToGuess array, which corresponds with the next tile in the pattern that should be clicked
-    const expectedTile = tiles[patternToGuess.shift()];
-    // Check if the correct tile was selected
-    if (expectedTile === selectedTile) {
-        // Check if the tile that was clicked was the last tile in the current pattern
-        if (patternToGuess.length === 0) {
-            // Add a new random tile to the pattern
-            pattern.push(getRandomTile());
-            // Put the the new pattern with the new random tile inside the patternToGuess array
-            // The reason we need patternToGuess is because shift() devours the current element, so each time the pattern is used up, we need to re-copy it from the pattern array
-            patternToGuess = [...pattern];
-            setTimeout(() => {
-                // Start outputting the next pattern after 500 ms
-                startFlashing();
-            }, 500)
-            updateRoundTracker();
-            localStorage.setItem("simon-game-pattern", JSON.stringify(patternToGuess));
-        }
+  displayGameSessionMenu() {
+    this.gameControlLayout.innerHTML = ''
+
+    const title = document.createElement('h3')
+    title.className = 'title'
+    title.innerText = 'Playing'
+
+    const roundDisplay = document.createElement('div')
+    roundDisplay.className = 'round-tracker'
+    roundDisplay.innerText = this.round.toString()
+
+    this.gameControlLayout.append(title, roundDisplay)
+    this.gameRoundTracker = document.querySelector('.round-tracker')
+  }
+
+  startGame(resumePreviousGame = false) {
+    this.round = resumePreviousGame ? this.previousPattern.length : 1
+    this.pattern = resumePreviousGame ? this.previousPattern : [this.getRandomTile()]
+    this.patternToGuess = [...this.pattern]
+
+    this.saveGameState()
+    this.displayGameSessionMenu()
+    this.tilePatternFlash()
+  }
+
+  endGame() {
+    this.clearGameState()
+    this.gameControlLayout.innerHTML = ''
+
+    const title = document.createElement('h3')
+    title.className = 'title'
+    title.innerText = 'You Lost'
+
+    const restartButton = document.createElement('button')
+    restartButton.className = 'button'
+    restartButton.innerText = 'Try Again'
+    restartButton.addEventListener('click', () => this.startGame())
+
+    this.gameControlLayout.append(title, restartButton)
+  }
+
+  updateRoundTracker() {
+    this.round++
+    this.gameRoundTracker.innerText = this.round.toString()
+  }
+
+  setTileListeners() {
+    this.tiles = {
+      tl: document.querySelector('.tile-tl'),
+      tr: document.querySelector('.tile-tr'),
+      bl: document.querySelector('.tile-bl'),
+      br: document.querySelector('.tile-br'),
     }
-    else { // If the wrong tile was selected, end the game
-        endGame();
+
+    for (const tile in this.tiles) {
+      this.tiles[tile].addEventListener('click', () => this.tileClick(this.tiles[tile]))
     }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// This function controls the flashing for each tile ///////////////////////////////////////////////////////////
-const flash = tile => {
+  }
+
+  getRandomTile() {
+    const keys = Object.keys(this.tiles)
+    return keys[parseInt(Math.random() * keys.length)]
+  }
+
+  async tilePatternFlash() {
+    this.canClick = false
+    for (const tile of this.pattern) {
+      await this.tileFlash(this.tiles[tile])
+    }
+    this.canClick = true
+  }
+
+  tileFlash(tile) {
     return new Promise((resolve, reject) => {
-        // Activates the current tile in the pattern
-        tile.classList.add('active')
-        // Set a timer for how long the active tile flashes before changing the active tile
+      tile.classList.add('active')
+      setTimeout(() => {
+        tile.classList.remove('active')
         setTimeout(() => {
-            tile.classList.remove('active');
-            // In case the pattern has the same tile back to back, it will be 2 short flashes instead of one long flash
-            setTimeout(() => {
-                resolve();
-            }, 200);
-        }, 700);
-    });
-}
+          resolve()
+        }, Game.TILE_REMOVAL_DELAY_MS)
+      }, Game.TILE_FLASH_DELAY_MS)
+    })
+  }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// This function controls the pattern flashes /////////////////////////////////////////////////////////////////
-const startFlashing = async () => {
-    // The user cannot click any tiles while the pattern is being displayed 
-    canClick = false;
-    for (const tile of pattern) {
-        // await promise so every tile doesn't flash at the same time
-        await flash(tiles[tile]);
+  tileClick(tile) {
+    if (!this.canClick) return
+
+    const expectedTile = this.tiles[this.patternToGuess.shift()]
+    if (tile === expectedTile) {
+      if (this.patternToGuess.length === 0) {
+        this.pattern.push(this.getRandomTile())
+        this.patternToGuess = [...this.pattern]
+        setTimeout(() => {
+          this.tilePatternFlash()
+        }, Game.TILE_FLASH_DELAY_MS)
+        this.updateRoundTracker()
+        this.saveGameState()
+      }
+    } else {
+      this.endGame()
     }
-    // The user can now click tiles since the pattern has finished flashing
-    canClick = true;
+  }
+
+  saveGameState() {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.pattern))
+  }
+
+  clearGameState() {
+    localStorage.removeItem(this.storageKey)
+  }
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////// Main function to run game ////////////////////////////////////////////////////////////////////////////
-const startGame = (continuation = false) => {
-    // Set tiles object with each game tile
-    tiles = {
-        tl: document.querySelector('.tile-tl'),
-        tr: document.querySelector('.tile-tr'),
-        bl: document.querySelector('.tile-bl'),
-        br: document.querySelector('.tile-br')
-    }
 
-    // Bind event listeners to event handlers
-    tiles.tl.addEventListener('mouseup', handleTopLeftMouseUp);
-    tiles.tr.addEventListener('mouseup', handleTopRightMouseUp);
-    tiles.bl.addEventListener('mouseup', handleBottomLeftMouseUp);
-    tiles.br.addEventListener('mouseup', handleBottomRightMouseUp);
-
-    // Initialize the game pattern
-    pattern = continuation ? previousGamePattern : [getRandomTile()];
-
-    // Update round counter
-    currentRound = continuation ? previousGamePattern.length : 1;
-
-    // This array is a copy of the pattern
-    // The user will keep guessing the next tile, and each time the first element will be removed so the next tile can be checked
-    // After the user has guessed all correct tiles and this array is empty, it will copy the pattern, including the new tile at the end, inside the tileClicked function
-    // First iteration it just copies the only element in the pattern array, which is the result from getRandomTile
-    patternToGuess = [...pattern];
-
-    // Store the initial game pattern to browser
-    localStorage.setItem("simon-game-pattern", JSON.stringify(pattern));
-
-    displayGameStatus();
-
-    startFlashing();
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Function to reset game after loss //////////////////////////////////////////////////////////////////////////
-const endGame = () => {
-    // Remove game state from local storage
-    localStorage.removeItem("simon-game-pattern");
-
-    // Reset round counter
-    currentRound = 1;
-
-    // Show game over menu
-    const gameControlLayout = document.querySelector('.game-control-layout');
-    gameControlLayout.innerHTML = ''; // Clear all existing HTML
-    gameControlLayout.style.display = 'flex';
-    gameControlLayout.style.justifyContent = 'center';
-
-    const h3 = document.createElement('h3');
-    h3.className = 'title';
-    h3.innerText = 'You Lost!';
-
-    const btn = document.createElement('button');
-    btn.className = 'button';
-    btn.innerText = 'Try Again'
-
-    btn.addEventListener('click', () => { startGame(); });
-
-    gameControlLayout.appendChild(h3);
-    gameControlLayout.appendChild(btn);
-
-    // Remove event listeners so they don't stack
-    tiles.tl.removeEventListener('mouseup', handleTopLeftMouseUp);
-    tiles.tr.removeEventListener('mouseup', handleTopRightMouseUp);
-    tiles.bl.removeEventListener('mouseup', handleBottomLeftMouseUp);
-    tiles.br.removeEventListener('mouseup', handleBottomRightMouseUp);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-//////////////////////////// Ways we can improve the code
-
-// Functionality
-//   As the user progresses, have the flashing timer decrease, or offer different difficulties at the beginning
-//   Have the duration of the flashes be random
-//   Add sound effects
-//   Add a timer that gives the user a limited time to input the pattern
-//   Add an evil red flash randomly in the pattern that is clearly not part of the pattern but meant to trip up the user
-
-// Style
-//   For each tile, add a more vibrant version of its color when it flashes or is clicked
-//   When the user fails, a menu pops up similar to the start menu instead of an alert and have all buttons flash at once
-//   Add responsiveness with media queries
+document.addEventListener('DOMContentLoaded', () => {
+  const game = new Game()
+  game.setTileListeners()
+  game.displayMainMenu()
+})
