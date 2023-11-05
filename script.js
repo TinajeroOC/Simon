@@ -31,6 +31,7 @@ class Game {
   }
 
   displayMainMenu() {
+    const existsPreviousPattern = Array.isArray(this.previousPattern) && this.previousPattern.length > 0
     this.gameControlLayout.innerHTML = ''
 
     const title = document.createElement('span')
@@ -39,7 +40,7 @@ class Game {
 
     const startButton = document.createElement('button')
     startButton.className = 'button'
-    startButton.innerText = this.previousPattern ? 'New Game' : 'Start Game'
+    startButton.innerText = existsPreviousPattern ? 'New Game' : 'Start Game'
     startButton.addEventListener('click', () => this.startGame())
 
     const continueGameButton = document.createElement('button')
@@ -59,7 +60,7 @@ class Game {
     tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
 
     this.gameControlLayout.append(title, startButton, difficultyButton, tutorialButton)
-    this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, difficultyButton)
+    existsPreviousPattern && this.gameControlLayout.insertBefore(continueGameButton, difficultyButton)
   }
 
   // Switches current difficulty setting between normal and hard
