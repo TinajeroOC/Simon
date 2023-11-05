@@ -47,19 +47,19 @@ class Game {
     continueGameButton.innerText = 'Continue Game'
     continueGameButton.addEventListener('click', () => this.startGame(true))
 
-    const tutorialButton = document.createElement('button')
-    tutorialButton.className = 'button'
-    tutorialButton.innerText = 'How to Play'
-    tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
-
     const difficultyButton = document.createElement('button')
     difficultyButton.className = 'button'
     difficultyButton.id = 'difficulty'
     difficultyButton.innerText = `${this.gameDifficulty} Mode`
     difficultyButton.addEventListener('click', () => this.switchDifficulty())
 
-    this.gameControlLayout.append(title, startButton, tutorialButton, difficultyButton)
-    this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, tutorialButton)
+    const tutorialButton = document.createElement('button')
+    tutorialButton.className = 'button'
+    tutorialButton.innerText = 'How to Play'
+    tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
+
+    this.gameControlLayout.append(title, startButton, difficultyButton, tutorialButton)
+    this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, difficultyButton)
   }
 
   // Switches current difficulty setting between normal and hard
