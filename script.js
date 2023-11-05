@@ -186,11 +186,11 @@ class Game {
   }
 
   saveGameState() {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.pattern))
+    localStorage.setItem(Game.STORAGE_KEY_PATTERN, JSON.stringify(this.pattern))
   }
 
   clearGameState() {
-    localStorage.removeItem(this.storageKey)
+    localStorage.removeItem(Game.STORAGE_KEY_PATTERN)
   }
 }
 
