@@ -1,14 +1,17 @@
 class Game {
-  static STORAGE_KEY = 'simon-game-pattern'
-  static TILE_FLASH_DELAY_MS = 600;
-  static TILE_REMOVAL_DELAY_MS = 300;
+  static STORAGE_KEY_PATTERN = 'simon-game-pattern'
+  static STORAGE_KEY_DIFFICULTY = 'simon-game-difficulty'
+  static TILE_FLASH_DELAY_MS = 600
+  static TILE_REMOVAL_DELAY_MS = 300
+  static TILE_FLASH_MULTIPLIER_DIFFICULTY = 0.5
 
   constructor() {
     // Game State Variables
     this.round = 1
+    this.gameDifficulty = localStorage.getItem(Game.STORAGE_KEY_DIFFICULTY) ?? 'Normal'
     this.pattern = []
     this.patternToGuess = []
-    this.previousPattern = JSON.parse(localStorage.getItem(this.storageKey))
+    this.previousPattern = JSON.parse(localStorage.getItem(Game.STORAGE_KEY_PATTERN)) ?? []
     this.canClick = false
     this.tiles = {
       tl: document.querySelector('.tile-tl'),
@@ -27,30 +30,52 @@ class Game {
     this.gameControlLayout = document.querySelector('.game-control-layout')
   }
 
+  randomNum(min, max) {
+    return Math.random() * (max - min) + min
+  }
+
   displayMainMenu() {
     this.gameControlLayout.innerHTML = ''
 
+    // Title
     const title = document.createElement('h3')
     title.className = 'title'
     title.innerText = 'Simon'
 
+    // Starts New / Previous Game
     const startButton = document.createElement('button')
     startButton.className = 'button'
     startButton.innerText = this.previousPattern ? 'New Game' : 'Start Game'
     startButton.addEventListener('click', () => this.startGame())
 
+    // Continues Previous Game Session
     const continueGameButton = document.createElement('button')
     continueGameButton.className = 'button'
     continueGameButton.innerText = 'Continue Game'
     continueGameButton.addEventListener('click', () => this.startGame(true))
 
+    // Tutorial Button
     const tutorialButton = document.createElement('button')
     tutorialButton.className = 'button'
     tutorialButton.innerText = 'How to Play'
     tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
 
-    this.gameControlLayout.append(title, startButton, tutorialButton)
+    // Difficulty Option
+    const diffButton = document.createElement('button')
+    diffButton.className = 'button'
+    diffButton.id = 'difficulty'
+    diffButton.innerText = `${this.gameDifficulty}`
+    diffButton.addEventListener('click', () => this.switchDifficulty())
+
+    this.gameControlLayout.append(title, startButton, tutorialButton, diffButton)
     this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, tutorialButton)
+  }
+
+  // Switches current difficulty setting between normal and hard
+  switchDifficulty() {
+    this.gameDifficulty = this.gameDifficulty === "Normal" ? "Hard" : "Normal"
+    localStorage.setItem(Game.STORAGE_KEY_DIFFICULTY, this.gameDifficulty)
+    document.getElementById('difficulty').innerText = `${this.gameDifficulty}`
   }
 
   displayTutorialMenu() {
@@ -138,8 +163,8 @@ class Game {
         tile.classList.remove('active')
         setTimeout(() => {
           resolve()
-        }, Game.TILE_REMOVAL_DELAY_MS)
-      }, Game.TILE_FLASH_DELAY_MS)
+        }, this.gameDifficulty === 'Normal' ? Game.TILE_REMOVAL_DELAY_MS : Game.TILE_REMOVAL_DELAY_MS * Game.TILE_FLASH_MULTIPLIER_DIFFICULTY)
+      }, this.gameDifficulty === 'Normal' ? Game.TILE_FLASH_DELAY_MS : Game.TILE_REMOVAL_DELAY_MS * Game.TILE_FLASH_MULTIPLIER_DIFFICULTY)
     })
   }
 
