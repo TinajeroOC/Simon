@@ -30,44 +30,35 @@ class Game {
     this.gameControlLayout = document.querySelector('.game-control-layout')
   }
 
-  randomNum(min, max) {
-    return Math.random() * (max - min) + min
-  }
-
   displayMainMenu() {
     this.gameControlLayout.innerHTML = ''
 
-    // Title
     const title = document.createElement('h3')
     title.className = 'title'
     title.innerText = 'Simon'
 
-    // Starts New / Previous Game
     const startButton = document.createElement('button')
     startButton.className = 'button'
     startButton.innerText = this.previousPattern ? 'New Game' : 'Start Game'
     startButton.addEventListener('click', () => this.startGame())
 
-    // Continues Previous Game Session
     const continueGameButton = document.createElement('button')
     continueGameButton.className = 'button'
     continueGameButton.innerText = 'Continue Game'
     continueGameButton.addEventListener('click', () => this.startGame(true))
 
-    // Tutorial Button
     const tutorialButton = document.createElement('button')
     tutorialButton.className = 'button'
     tutorialButton.innerText = 'How to Play'
     tutorialButton.addEventListener('click', () => this.displayTutorialMenu())
 
-    // Difficulty Option
-    const diffButton = document.createElement('button')
-    diffButton.className = 'button'
-    diffButton.id = 'difficulty'
-    diffButton.innerText = `${this.gameDifficulty}`
-    diffButton.addEventListener('click', () => this.switchDifficulty())
+    const difficultyButton = document.createElement('button')
+    difficultyButton.className = 'button'
+    difficultyButton.id = 'difficulty'
+    difficultyButton.innerText = `${this.gameDifficulty} Mode`
+    difficultyButton.addEventListener('click', () => this.switchDifficulty())
 
-    this.gameControlLayout.append(title, startButton, tutorialButton, diffButton)
+    this.gameControlLayout.append(title, startButton, tutorialButton, difficultyButton)
     this.previousPattern && this.gameControlLayout.insertBefore(continueGameButton, tutorialButton)
   }
 
@@ -75,7 +66,7 @@ class Game {
   switchDifficulty() {
     this.gameDifficulty = this.gameDifficulty === "Normal" ? "Hard" : "Normal"
     localStorage.setItem(Game.STORAGE_KEY_DIFFICULTY, this.gameDifficulty)
-    document.getElementById('difficulty').innerText = `${this.gameDifficulty}`
+    document.getElementById('difficulty').innerText = `${this.gameDifficulty} Mode`
   }
 
   displayTutorialMenu() {
@@ -135,7 +126,13 @@ class Game {
     restartButton.innerText = 'Try Again'
     restartButton.addEventListener('click', () => this.startGame())
 
-    this.gameControlLayout.append(title, restartButton)
+    const difficultyButton = document.createElement('button')
+    difficultyButton.className = 'button'
+    difficultyButton.id = 'difficulty'
+    difficultyButton.innerText = `${this.gameDifficulty} Mode`
+    difficultyButton.addEventListener('click', () => this.switchDifficulty())
+
+    this.gameControlLayout.append(title, restartButton, difficultyButton)
   }
 
   updateRoundTracker() {
