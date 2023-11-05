@@ -33,7 +33,7 @@ class Game {
   displayMainMenu() {
     this.gameControlLayout.innerHTML = ''
 
-    const title = document.createElement('h3')
+    const title = document.createElement('span')
     title.className = 'title'
     title.innerText = 'Simon'
 
@@ -72,7 +72,7 @@ class Game {
   displayTutorialMenu() {
     this.gameControlLayout.innerHTML = ''
 
-    const title = document.createElement('h3')
+    const title = document.createElement('span')
     title.className = 'title'
     title.innerText = 'How To Play'
 
@@ -91,7 +91,7 @@ class Game {
   displayGameSessionMenu() {
     this.gameControlLayout.innerHTML = ''
 
-    const title = document.createElement('h3')
+    const title = document.createElement('span')
     title.className = 'title'
     title.innerText = 'Playing'
 
@@ -117,7 +117,7 @@ class Game {
     this.clearGameState()
     this.gameControlLayout.innerHTML = ''
 
-    const title = document.createElement('h3')
+    const title = document.createElement('span')
     title.className = 'title'
     title.innerText = 'You Lost'
 

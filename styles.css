@@ -97,11 +97,12 @@ body {
   font-weight: bold;
   text-transform: uppercase;
   user-select: none;
+  margin: 1rem 0rem;
 }
 
 .game-control-layout .button {
   width: 12rem;
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 8rem;
   border: none;
   color: white;
